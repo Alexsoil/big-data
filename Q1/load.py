@@ -80,12 +80,12 @@ print(Q3_2)
 #Q4.to_pickle("pickleJar" + os.path.sep + "Q4_table.pkl")
 #print(Q4)
 
-Q5 = pd.DataFrame
+#Q5 = pd.DataFrame
 
-Q5 = movie[['movieId', 'title']].merge(rating[['movieId', 'rating']], on='movieId', how='outer')
-Q5 = Q5.merge(tag[['movieId', 'tag']], on='movieId', how='outer')
-Q5.to_pickle("pickleJar" + os.path.sep + "Q5_table.pkl")
-print(Q5)
+#Q5 = movie[['movieId', 'title']].merge(rating[['movieId', 'rating']], on='movieId', how='outer')
+#Q5 = Q5.merge(tag[['movieId', 'tag']], on='movieId', how='outer')
+#Q5.to_pickle("pickleJar" + os.path.sep + "Q5_table.pkl")
+#print(Q5)
 
 #print(movie[['movieId', 'title']])
 
