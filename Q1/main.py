@@ -18,69 +18,60 @@ try:
     # for row in rows:
     #     print ('MovieID: {id} Title:{title} Rating:{score} Timestamp:{date}'.format(id=row[0], title=row[3], score=row[2], date=row[1]))
 
-
-
     row = session.execute("DROP TABLE IF EXISTS movies_by_rating;")
     row = session.execute("CREATE TABLE movies_by_rating (movieId int, title text, rating float, stamp timestamp, PRIMARY KEY ((movieId), stamp) ) WITH comment = 'Q1. Find best rated movies on specific timeframe' AND CLUSTERING ORDER BY (stamp DESC);")
     print(row)
     query = "INSERT INTO movies_by_rating (movieId, title, rating, stamp) VALUES (?, ?, ?, ?)"
-    batch = BatchStatement(consistency_level=ConsistencyLevel.QUORUM)
+    # batch = BatchStatement(consistency_level=ConsistencyLevel.QUORUM)
     prepared = session.prepare(query)
-    Q1 = pd.read_pickle("pickleJar" + os.path.sep + "Q1_table.pkl")
-    for idx, row in Q1.iterrows():
-        query = "insert into movies_by_rating (movieId, title, rating, stamp) values (" + str(row['movieId']) + ", '" + str(row['title'].rstrip()) + "', " + str(row['rating']) + ", '" + str(row['timestamp']) + "');"
-        session.execute(query)
+    Q = pd.read_pickle("pickleJar" + os.path.sep + "Q1_table.pkl")
+    for idx, row in Q.iterrows():
+        session.execute(prepared, (row[0], row[1], row[2], row[3]))
 
-
-
-    row2 = session.execute("DROP TABLE IF EXISTS movies_by_keyword;")
-    row2 = session.execute("CREATE TABLE movies_by_keyword (movieId int, title text, rating float, PRIMARY KEY ((movieId), title) ) WITH comment = 'Q1. Find movies by using keywords';")
-    print(row2)
-    Q2 = pd.read_pickle("pickleJar" + os.path.sep + "Q2_table.pkl")
-    for idx, row2 in Q2.iterrows():
-        query = "insert into movies_by_keyword (movieId, title, rating) values (" + str(row2['movieId']) + ", '" + str(row2['title'].rstrip()) + "', " + str(row2['rating']) +"');"
-        session.execute(query)
-
-
-
-    row3 = session.execute("DROP TABLE IF EXISTS movies_by_genre(rating);")
-    row3 = session.execute("CREATE TABLE movies_by_genre(rating) (movieId int, title text, genres text, rating float, PRIMARY KEY ((movieId), genres) ) WITH comment = 'Q1. Find movies by genre, sorted by rating';")
-    print(row3)
-    Q3_1 = pd.read_pickle("pickleJar" + os.path.sep + "Q3_1_table.pkl")
-    for idx, row3 in Q3_1.iterrows():
-        query = "insert into movies_by_genre(rating) (movieId, title, genres, rating) values (" + str(row3['movieId']) + ", '" + str(row3['title'].rstrip()) + "', " + str(row3['genres']) + ", '"+ str(row3['rating']) + ", '" + "');"
-        session.execute(query)
-
-
-
-    row3_2 = session.execute("DROP TABLE IF EXISTS movies_by_genres(release_date);")
-    row3_2 = session.execute("CREATE TABLE movies_by_genres(release_date) (movieId int, title text, genres text, date year, PRIMARY KEY ((movieId), genres) ) WITH comment = 'Q1. Find movies by genre, sorted by release date';")
+    row = session.execute("DROP TABLE IF EXISTS movies_by_keyword;")
+    row = session.execute("CREATE TABLE movies_by_keyword (movieId int, title text, rating float, PRIMARY KEY ((movieId), title) ) WITH comment = 'Q2. Find movies by using keywords';")
     print(row)
-    Q3_2 = pd.read_pickle("pickleJar" + os.path.sep + "Q3_2_table.pkl")
-    for idx, row3_2 in Q3_2.iterrows():
-        query = "insert into movies_by_genres(release_date) (movieId, title, genres, date) values (" + str(row3_2['movieId']) + ", '" + str(row3_2['title'].rstrip()) + "', " + str(row3_2['genres']) + ", '" + str(row3_2['date']) + "');"
-        session.execute(query)
+    query = "INSERT INTO movies_by_keyword (movieId, title, rating, stamp) VALUES (?, ?, ?)"
+    prepared = session.prepare(query)
+    Q = pd.read_pickle("pickleJar" + os.path.sep + "Q2_table.pkl")
+    for idx, row in Q.iterrows():
+        session.execute(prepared, (row[0], row[1], row[2]))
 
+    row = session.execute("DROP TABLE IF EXISTS movies_by_genre_rating;")
+    row = session.execute("CREATE TABLE movies_by_genre_rating (movieId int, title text, genres set, rating float, PRIMARY KEY ((movieId), genres, rating) ) WITH comment = 'Q3_1. Find movies by genre, sorted by rating' AND CLUSTERING ORDER BY (genres ASC, rating DESC);")
+    print(row)
+    query = "INSERT INTO movies_by_genre_rating (movieId, title, genres, rating) VALUES (?, ?, ?, ?)"
+    prepared = session.prepare(query)
+    Q = pd.read_pickle("pickleJar" + os.path.sep + "Q3_1_table.pkl")
+    for idx, row in Q.iterrows():
+        session.execute(prepared, (row[0], row[1], row[2], row[3]))
 
+    row = session.execute("DROP TABLE IF EXISTS movies_by_genres(release_date);")
+    row = session.execute("CREATE TABLE movies_by_genres(release_date) (movieId int, title text, genres text, date int, PRIMARY KEY ((movieId), genres, date) ) WITH comment = 'Q3_2. Find movies by genre, sorted by release date' AND CLUSTERING ORDER BY (genres ASC, date DESC);")
+    print(row)
+    query = "INSERT INTO movies_by_genre_rating (movieId, title, genres, date) VALUES (?, ?, ?, ?)"
+    prepared = session.prepare(query)
+    Q = pd.read_pickle("pickleJar" + os.path.sep + "Q3_2_table.pkl")
+    for idx, row in Q.iterrows():
+        session.execute(prepared, (row[0], row[1], row[2], row[3]))
 
-    #row4 = session.execute("DROP TABLE IF EXISTS movie_info;")
-    #row4 = session.execute("CREATE TABLE movie_info (movieId int, title text, genres text, rating float, tag text, PRIMARY KEY ((movieId), title) ) WITH comment = 'Q1. View more info about a movie';")
-    #print(row)
-    #Q4 = pd.read_pickle("pickleJar" + os.path.sep + "Q4_table.pkl")
-    #for idx, row4 in Q4.iterrows():
-      #  query = "insert into movie_info (movieId, title, genres, rating, tag) values (" + str(row4['movieId']) + ", '" + str(row4['title'].rstrip()) + "', " + str(row4['genres']) + ", '" + str(row4['rating']) + ", '" + str(row4['tag']) + "');"
-      #  session.execute(query)
+    row = session.execute("DROP TABLE IF EXISTS movie_info;")
+    row = session.execute("CREATE TABLE movie_info (movieId int, title text, genres set, rating float, tag text, PRIMARY KEY ((movieId), tag) ) WITH comment = 'Q4. View more info about a movie';")
+    print(row)
+    query = "INSERT INTO movies_by_genre_rating (movieId, title, rating, tag) VALUES (?, ?, ?, ?, ?)"
+    prepared = session.prepare(query)
+    Q = pd.read_pickle("pickleJar" + os.path.sep + "Q4_table.pkl")
+    for idx, row4 in Q.iterrows():
+       session.execute(prepared, (row[0], row[1], row[2], row[3], row[4]))
 
-
-    
-   # row5 = session.execute("DROP TABLE IF EXISTS movies_by_tag;")
-   # row5 = session.execute("CREATE TABLE movies_by_tag (movieId int, title text, tag text, rating float, PRIMARY KEY ((movieId), tag) ) WITH comment = 'Q1. Find top movies by tag';")
-   # print(row)
-   # Q5 = pd.read_pickle("pickleJar" + os.path.sep + "Q5_table.pkl")
-   # for idx, row5 in Q5.iterrows():
-       # query = "insert into movies_by_tag (movieId, title, tag, rating) values (" + str(row5['movieId']) + ", '" + str(row5['title'].rstrip()) + "', " + str(row5['tag']) + ", '" + str(row5['rating']) + "');"
-       # session.execute(query)
-
+    row = session.execute("DROP TABLE IF EXISTS movies_by_tag;")
+    row = session.execute("CREATE TABLE movies_by_tag (movieId int, title text, rating float, tag text, PRIMARY KEY ((movieId), tag) ) WITH comment = 'Q5. View movies relevant to a tag' AND CLUSTERING ORDER BY (tag ASC);")
+    print(row)
+    query = "INSERT INTO movies_by_genre_rating (movieId, title, rating, tag) VALUES (?, ?, ?, ?)"
+    prepared = session.prepare(query)
+    Q = pd.read_pickle("pickleJar" + os.path.sep + "Q5_table.pkl")
+    for idx, row4 in Q.iterrows():
+       session.execute(prepared, (row[0], row[1], row[2], row[3]))
 
 
 

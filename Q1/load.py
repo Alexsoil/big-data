@@ -5,7 +5,7 @@ import os
 import datetime as dt
 import fnmatch
 
-pd.set_option('display.max_rows', None)
+# pd.set_option('display.max_rows', None)
 
 try:
     genome = pd.read_pickle("pickleJar" + os.path.sep + "genome_tags.pkl")
@@ -63,51 +63,42 @@ except:
 # movies information by name (genre, score, top5 tags)
 # movies by tag sorted by score (top-n)
 
-print(movie)
-# print(rating)
-# print(avg)
-exit()
-Q1 = pd.DataFrame
+Q = pd.DataFrame
+print("Making Q1...")
+Q = movie[['movieId', 'title']].merge(rating[['movieId', 'rating', 'timestamp']], on='movieId', how='left')
+Q.to_pickle("pickleJar" + os.path.sep + "Q1_table.pkl")
+# Q.to_csv("archive" + os.path.sep + "Q1_table.csv")
+print(Q)
 
-Q1 = movie[['movieId', 'title']].merge(rating[['movieId', 'rating', 'timestamp']], on='movieId', how='outer')
-Q1['movieId'].astype(str)
-Q1['rating'].astype(str)
-Q1['timestamp'] = pd.to_datetime(Q1['timestamp'])
-Q1.to_pickle("pickleJar" + os.path.sep + "Q1_table.pkl")
-# Q1.to_csv("archive" + os.path.sep + "Q1_table.csv")
-print(Q1)
+print("Making Q2...")
+Q = movie[['movieId', 'title', 'rating']]
+Q.to_pickle("pickleJar" + os.path.sep + "Q2_table.pkl")
+# Q.to_csv("archive" + os.path.sep + "Q2_table.pkl")
+print(Q)
 
-Q2 = pd.DataFrame
+print("Making Q3.1...")
+Q = movie[['movieId', 'title', 'genres', 'rating']]
+Q.to_pickle("pickleJar" + os.path.sep + "Q3_1_table.pkl")
+# Q.to_csv("archive" + os.path.sep + "Q3_1_table.csv")
+print(Q)
 
-Q2 = movie[['movieId', 'title']].merge(rating[['movieId', 'rating']], on='movieId', how='outer')
-Q2.to_pickle("pickleJar" + os.path.sep + "Q2_table.pkl")
-print(Q2)
+print("Making Q3.2...")
+Q = movie[['movieId', 'title', 'genres','date']]
+Q.to_pickle("pickleJar" + os.path.sep + "Q3_2_table.pkl")
+# Q.to_csv("archive" + os.path.sep + "Q3_2_table.csv")
+print(Q)
 
-Q3_1 = pd.DataFrame
+print("Making Q4...")
+Q = movie[['movieId', 'title', 'genres', 'rating']].merge(tag[['movieId', 'tag']], on='movieId', how='left')
+Q.to_pickle("pickleJar" + os.path.sep + "Q4_table.pkl")
+# Q.to_csv("archive" + os.path.sep + "Q4_table.csv")
+print(Q)
 
-Q3_1 = movie[['movieId', 'title', 'genres']].merge(rating[['movieId', 'rating']], on='movieId', how='outer')
-Q3_1.to_pickle("pickleJar" + os.path.sep + "Q3_1_table.pkl")
-print(Q3_1)
-
-Q3_2 = pd.DataFrame
-
-Q3_2 = movie[['movieId', 'title', 'genres','date']]
-Q3_2.to_pickle("pickleJar" + os.path.sep + "Q3_2_table.pkl")
-print(Q3_2)
-
-#Q4 = pd.DataFrame
-
-#Q4 = movie[['movieId', 'title', 'genres']].merge(rating[['movieId', 'rating']], on='movieId', how='outer')
-#Q4 = Q4.merge(tag[['movieId', 'tag']], on='movieId', how='outer')
-#Q4.to_pickle("pickleJar" + os.path.sep + "Q4_table.pkl")
-#print(Q4)
-
-#Q5 = pd.DataFrame
-
-#Q5 = movie[['movieId', 'title']].merge(rating[['movieId', 'rating']], on='movieId', how='outer')
-#Q5 = Q5.merge(tag[['movieId', 'tag']], on='movieId', how='outer')
-#Q5.to_pickle("pickleJar" + os.path.sep + "Q5_table.pkl")
-#print(Q5)
+print("Making Q5...")
+Q = movie[['movieId', 'title', 'rating']].merge(tag[['movieId', 'tag']], on='movieId', how='left')
+Q.to_pickle("pickleJar" + os.path.sep + "Q5_table.pkl")
+# Q.to_csv("pickleJar" + os.path.sep + "Q5_table.pkl")
+print(Q)
 
 #print(movie[['movieId', 'title']])
 
