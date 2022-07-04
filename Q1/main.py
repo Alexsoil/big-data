@@ -3,6 +3,9 @@ import connect_db
 import pandas as pd
 import os
 from cassandra import cluster
+from cassandra import ConsistencyLevel
+from cassandra.query import BatchStatement
+from tqdm import tqdm
 
 
 try:
@@ -18,8 +21,11 @@ try:
 
 
     row = session.execute("DROP TABLE IF EXISTS movies_by_rating;")
-    row = session.execute("CREATE TABLE movies_by_rating (movieId int, title text, rating float, stamp timestamp, PRIMARY KEY ((movieId), stamp) ) WITH comment = 'Q1. Find best rated movies on specific timeframe';")
+    row = session.execute("CREATE TABLE movies_by_rating (movieId int, title text, rating float, stamp timestamp, PRIMARY KEY ((movieId), stamp) ) WITH comment = 'Q1. Find best rated movies on specific timeframe' AND CLUSTERING ORDER BY (stamp DESC);")
     print(row)
+    query = "INSERT INTO movies_by_rating (movieId, title, rating, stamp) VALUES (?, ?, ?, ?)"
+    batch = BatchStatement(consistency_level=ConsistencyLevel.QUORUM)
+    prepared = session.prepare(query)
     Q1 = pd.read_pickle("pickleJar" + os.path.sep + "Q1_table.pkl")
     for idx, row in Q1.iterrows():
         query = "insert into movies_by_rating (movieId, title, rating, stamp) values (" + str(row['movieId']) + ", '" + str(row['title'].rstrip()) + "', " + str(row['rating']) + ", '" + str(row['timestamp']) + "');"
